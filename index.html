@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prāṇa AI (प्राण) — Urban Air Quality & Winter Smog Assistant</title>
+  <meta name="description" content="GenAI-powered urban air quality copilot helping families navigate severe winter smog, thermal inversions, low-emission daily routines, indoor IAQ hacks, and quantified impact.">
+  <meta name="theme-color" content="#090d16">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-theme="dark">
+  <!-- Application Shell -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation (Uncluttered Architecture) -->
+    <aside class="sidebar" id="main-sidebar" aria-label="Main Navigation">
+      <div class="sidebar-brand">
+        <div class="brand-crest">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Prāṇa AI <span class="brand-sanskrit">प्राण</span></span>
+          <span class="brand-tagline">Urban Smog & IAQ Copilot</span>
+        </div>
+      </div>
+
+      <!-- Live Inversion Beacon -->
+      <div class="inversion-status-card" id="inversion-status-pill">
+        <span class="status-dot pulsing"></span>
+        <div class="status-details">
+          <span class="status-title" id="sidebar-status-title">Inversion Active</span>
+          <span class="status-subtitle" id="sidebar-safe-window">Vent: 1:00 PM – 3:00 PM</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-menu" role="tablist">
+        <button class="nav-item active" data-tab="tab-overview" role="tab" aria-selected="true" id="nav-btn-overview">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+          </svg>
+          <span class="nav-label">Air Matrix & Radar</span>
+          <span class="nav-badge" id="nav-aqi-badge">420</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-routine" role="tab" aria-selected="false" id="nav-btn-routine">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span class="nav-label">Routine Optimizer</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-iaq" role="tab" aria-selected="false" id="nav-btn-iaq">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span class="nav-label">Indoor IAQ & DIY Hacks</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-impact" role="tab" aria-selected="false" id="nav-btn-impact">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 14 14"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span class="nav-label">Impact & Alternatives</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-community" role="tab" aria-selected="false" id="nav-btn-community">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span class="nav-label">Community Sentinel</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-chat" role="tab" aria-selected="false" id="nav-btn-chat">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="nav-label">Prāṇa AI Assistant</span>
+          <span class="ai-sparkle">✦</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer Telemetry -->
+      <div class="sidebar-footer">
+        <div class="telemetry-row">
+          <span class="badge-mini"><span class="dot-green"></span> Engine: FastAPI</span>
+          <span class="badge-mini" id="latency-badge">< 15ms</span>
+        </div>
+        <div class="telemetry-row">
+          <span class="badge-mini">🛡️ Zero-Secret Law</span>
+          <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle Theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Stage -->
+    <main class="main-stage">
+      
+      <!-- Top Control Bar -->
+      <header class="top-bar">
+        <div class="mobile-nav-toggle" id="mobile-toggle" aria-label="Open Navigation">
+          <span></span><span></span><span></span>
+        </div>
+
+        <!-- Global Location Picker -->
+        <div class="location-selector-wrap">
+          <svg class="loc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <select id="global-city-select" aria-label="Select City Hotspot">
+            <option value="Delhi-NCR" selected>Delhi-NCR (Severe Smog)</option>
+            <option value="Lahore">Lahore (Transboundary Inversion)</option>
+            <option value="Beijing">Beijing (Winter Heating)</option>
+            <option value="Salt Lake City">Salt Lake City (Valley Inversion)</option>
+            <option value="London">London (Urban NO2 Stagnation)</option>
+            <option value="Mumbai">Mumbai (Coastal Humidity Trap)</option>
+          </select>
+        </div>
+
+        <!-- Active Persona Pill -->
+        <div class="persona-selector-wrap">
+          <label for="global-persona-select" class="sr-only">Select Household Persona</label>
+          <select id="global-persona-select" aria-label="Select Persona">
+            <option value="family_with_kids" selected>👨‍👩‍👧 Family with Children & Elderly</option>
+            <option value="daily_commuter">🚗 Daily Commuter & Office Goer</option>
+            <option value="high_risk_asthma">🫁 High-Risk Asthmatic Sanctuary</option>
+            <option value="community_leader">📢 Community & RWA Mobilizer</option>
+          </select>
+        </div>
+
+        <!-- Emergency Banner Pill -->
+        <div class="emergency-pill" id="global-emergency-banner">
+          <span class="pulse-icon">⚠️</span>
+          <span id="emergency-banner-text">Severe Inversion: Window Flush at 1:00 PM</span>
+        </div>
+      </header>
+
+      <!-- Content Views (Only one active at a time to prevent clutter) -->
+      <div class="content-container">
+
+        <!-- ================= TAB 1: OVERVIEW & SMOG RADAR ================= -->
+        <section class="tab-pane active" id="tab-overview" role="tabpanel">
+          
+          <div class="overview-grid">
+            
+            <!-- Hero Gauge Card -->
+            <div class="card glass-card hero-gauge-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Real-Time Atmospheric Air Matrix</h2>
+                  <p class="card-subtitle" id="hero-city-country">Delhi-NCR, India</p>
+                </div>
+                <span class="badge-category" id="hero-aqi-category">Severe (Hazardous)</span>
+              </div>
+
+              <div class="gauge-content">
+                <div class="radial-gauge-wrap">
+                  <svg class="radial-gauge" viewBox="0 0 200 200">
+                    <circle class="gauge-bg" cx="100" cy="100" r="82" />
+                    <circle class="gauge-fill" id="gauge-fill-circle" cx="100" cy="100" r="82" />
+                  </svg>
+                  <div class="gauge-number-wrap">
+                    <span class="gauge-value" id="hero-aqi-value">420</span>
+                    <span class="gauge-label">AQI (US EPA/CPCB)</span>
+                    <span class="gauge-sub" id="hero-dominant-pollutant">Dominant: PM2.5</span>
+                  </div>
+                </div>
+
+                <div class="gauge-insights">
+                  <div class="insight-box danger">
+                    <div class="insight-icon">🚬</div>
+                    <div class="insight-data">
+                      <span class="insight-num" id="hero-cigarettes-value">17.5</span>
+                      <span class="insight-lbl">Cigarettes / Day Inhaled Equivalent</span>
+                    </div>
+                  </div>
+
+                  <div class="insight-box highlight">
+                    <div class="insight-icon">🪟</div>
+                    <div class="insight-data">
+                      <span class="insight-num" id="hero-safe-vent-window">1:00 PM – 3:00 PM</span>
+                      <span class="insight-lbl">Solar Boundary Ventilation Window</span>
+                    </div>
+                  </div>
+
+                  <p class="advisory-text" id="hero-health-advisory">
+                    Severe winter radiation inversion active below 180m. Alveolar penetration risk is extreme. Keep all windows sealed.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diurnal Inversion Curve Card -->
+            <div class="card glass-card inversion-chart-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">24-Hour Diurnal Thermal Inversion Dynamics</h3>
+                  <p class="card-subtitle">Ground Smog Capping Index vs Atmospheric Boundary Mixing Height</p>
+                </div>
+                <div class="chart-legend">
+                  <span class="legend-item"><span class="legend-dot trap"></span> Smog Trap Index</span>
+                  <span class="legend-item"><span class="legend-dot safe"></span> Safe Vent Window</span>
+                </div>
+              </div>
+
+              <!-- Interactive Inversion Bar Canvas / SVG Timeline -->
+              <div class="inversion-timeline-container" id="inversion-timeline-track">
+                <!-- Dynamically rendered 24-hr bars via app.js -->
+              </div>
+
+              <div class="timeline-explanation">
+                <span class="exp-badge">💡 Physics Explanation</span>
+                <p id="inversion-explanation-text">
+                  Nocturnal radiative cooling creates a cold air lid below 180m, trapping exhaust and particulate matter from 5:00 AM to 9:30 AM. Between 1:00 PM and 3:30 PM, solar radiation expands the planetary mixing height to ~950m, dispersing surface smog by up to 55%.
+                </p>
+              </div>
+            </div>
+
+            <!-- Pollutants Telemetry Matrix -->
+            <div class="card glass-card pollutants-card">
+              <h3 class="card-title">Criteria Pollutant Telemetry</h3>
+              <div class="pollutant-grid" id="pollutants-telemetry-grid">
+                <div class="pollutant-tile">
+                  <span class="p-name">PM2.5</span>
+                  <span class="p-val" id="val-pm25">385.0 <small>µg/m³</small></span>
+                  <span class="p-ratio danger">25.6x WHO Safe Limit</span>
+                </div>
+                <div class="pollutant-tile">
+                  <span class="p-name">PM10</span>
+                  <span class="p-val" id="val-pm10">490.0 <small>µg/m³</small></span>
+                  <span class="p-ratio danger">10.8x WHO Safe Limit</span>
+                </div>
+                <div class="pollutant-tile">
+                  <span class="p-name">NO₂</span>
+                  <span class="p-val" id="val-no2">82.0 <small>µg/m³</small></span>
+                  <span class="p-ratio warning">High Traffic Corridors</span>
+                </div>
+                <div class="pollutant-tile">
+                  <span class="p-name">Carbon Monoxide (CO)</span>
+                  <span class="p-val" id="val-co">3.8 <small>mg/m³</small></span>
+                  <span class="p-ratio">Inversion Stagnation</span>
+                </div>
+                <div class="pollutant-tile">
+                  <span class="p-name">Ozone (O₃)</span>
+                  <span class="p-val" id="val-o3">28.0 <small>µg/m³</small></span>
+                  <span class="p-ratio good">Normal Winter Tier</span>
+                </div>
+                <div class="pollutant-tile">
+                  <span class="p-name">Temp & Humidity</span>
+                  <span class="p-val" id="val-temp-hum">13.5°C / 78%</span>
+                  <span class="p-ratio">Dew Point Fog Formation</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ================= TAB 2: ROUTINE OPTIMIZER ================= -->
+        <section class="tab-pane" id="tab-routine" role="tabpanel">
+          
+          <div class="routine-header-row">
+            <div>
+              <h2 class="card-title">Tailored Low-Emission Daily Routine</h2>
+              <p class="card-subtitle">Synchronized with diurnal smog curves to protect lungs and eliminate urban tailpipe emissions.</p>
+            </div>
+            <div class="routine-actions">
+              <button class="btn btn-primary" id="btn-refresh-routine">
+                <span>⚡ Re-Optimize for Current Inversion</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-print-routine">
+                <span>📋 Export Schedule</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cumulative Routine Impact Summary -->
+          <div class="routine-summary-banner">
+            <div class="summary-stat">
+              <span class="stat-num" id="routine-pm25-saved">642.5 µg</span>
+              <span class="stat-lbl">Inhaled PM2.5 Exposure Slashed</span>
+            </div>
+            <div class="summary-stat">
+              <span class="stat-num" id="routine-cigs-averted">5.8</span>
+              <span class="stat-lbl">Cigarettes Toxicity Shielded</span>
+            </div>
+            <div class="summary-stat">
+              <span class="stat-num" id="routine-co2-cut">6.0 kg</span>
+              <span class="stat-lbl">Community CO₂ Emissions Diverted</span>
+            </div>
+            <div class="summary-stat">
+              <span class="stat-num" id="routine-safe-slot">1:00 PM – 3:00 PM</span>
+              <span class="stat-lbl">Optimal Natural Solar Flush</span>
+            </div>
+          </div>
+
+          <!-- Routine Steps Timeline -->
+          <div class="routine-steps-list" id="routine-steps-container">
+            <!-- Dynamically populated steps via app.js -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 3: INDOOR IAQ & DIY HACKS ================= -->
+        <section class="tab-pane" id="tab-iaq" role="tabpanel">
+          
+          <div class="iaq-grid">
+            
+            <!-- Room Sizer & CADR Calculator -->
+            <div class="card glass-card iaq-calc-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Indoor Room CADR & Filtration Sizer</h2>
+                  <p class="card-subtitle">Calculate Clean Air Delivery Rate (CADR) for minimum 5 Air Changes / Hour</p>
+                </div>
+              </div>
+
+              <form id="iaq-calculator-form" class="iaq-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="room-name-input">Room Space</label>
+                    <input type="text" id="room-name-input" value="Children's Bedroom / Nursery">
+                  </div>
+                  <div class="form-group">
+                    <label for="room-length-input">Length (ft)</label>
+                    <input type="number" id="room-length-input" value="14" min="6" max="60">
+                  </div>
+                  <div class="form-group">
+                    <label for="room-width-input">Width (ft)</label>
+                    <input type="number" id="room-width-input" value="12" min="6" max="60">
+                  </div>
+                  <div class="form-group">
+                    <label for="room-height-input">Ceiling (ft)</label>
+                    <input type="number" id="room-height-input" value="10" min="7" max="25">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="smog-risk-select">Smog Entry Risk</label>
+                    <select id="smog-risk-select">
+                      <option value="HIGH" selected>High (Street facing / leaky windows)</option>
+                      <option value="MEDIUM">Medium (Double glazed / inner courtyard)</option>
+                      <option value="LOW">Low (Sealed HVAC with pre-filters)</option>
+                    </select>
+                  </div>
+                  <div class="form-group submit-group">
+                    <button type="submit" class="btn btn-primary" id="btn-calc-iaq">Calculate IAQ Sizing</button>
+                  </div>
+                </div>
+              </form>
+
+              <!-- CADR Target Display -->
+              <div class="cadr-results-strip" id="cadr-results-box">
+                <div class="cadr-stat">
+                  <span class="cadr-label">Room Volume</span>
+                  <span class="cadr-val" id="res-room-volume">1,680 cu.ft</span>
+                </div>
+                <div class="cadr-stat highlight">
+                  <span class="cadr-label">Target CADR Required</span>
+                  <span class="cadr-val" id="res-target-cadr">140 CFM</span>
+                </div>
+                <div class="cadr-stat">
+                  <span class="cadr-label">Target ACH</span>
+                  <span class="cadr-val" id="res-target-ach">5.0 Changes/Hr</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- DIY Corsi-Rosenthal Box Blueprint -->
+            <div class="card glass-card corsi-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">🛠️ Open-Source Corsi-Rosenthal Box Purifier</h3>
+                  <p class="card-subtitle">Democratizing clean air: 250+ CFM at 1/5th commercial cost</p>
+                </div>
+                <span class="badge-savings" id="corsi-savings-badge">Save 82.9% vs HEPA</span>
+              </div>
+
+              <div class="corsi-blueprint-content">
+                <div class="corsi-specs-grid">
+                  <div class="spec-item">
+                    <span class="spec-label">Box Fan Size</span>
+                    <span class="spec-val">20-inch 3-Speed</span>
+                  </div>
+                  <div class="spec-item">
+                    <span class="spec-label">Filter Spec</span>
+                    <span class="spec-val">4x MERV 13 (20x20x2")</span>
+                  </div>
+                  <div class="spec-item">
+                    <span class="spec-label">CADR Output</span>
+                    <span class="spec-val highlight-val">250–320 CFM</span>
+                  </div>
+                  <div class="spec-item">
+                    <span class="spec-label">Build Cost</span>
+                    <span class="spec-val cost-good">$65 / ₹4,500</span>
+                  </div>
+                </div>
+
+                <div class="corsi-steps">
+                  <h4>5-Step 15-Minute Assembly Blueprint:</h4>
+                  <ol id="corsi-steps-list">
+                    <li>Tape four 20x20x2-inch MERV 13 filters into a square cube pointing airflow inward.</li>
+                    <li>Seal the bottom with a 20x20 cardboard panel using duct tape.</li>
+                    <li>Place the 20-inch box fan on top, exhausting upward into the room.</li>
+                    <li>Cut a 14-inch circular cardboard shroud and tape it to the fan face to eliminate backdraft vortices.</li>
+                    <li>Plug into standard socket on low/medium speed for continuous silent purification.</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <!-- NASA Botanical Clean Air Phytoremediation -->
+            <div class="card glass-card plants-card">
+              <h3 class="card-title">🌿 NASA Clean Air Botanical Phytoremediation</h3>
+              <p class="card-subtitle">Natural bio-filtration for indoor VOCs, moisture, and nighttime oxygenation</p>
+              
+              <div class="plants-grid" id="plants-display-grid">
+                <!-- Dynamically populated via app.js -->
+              </div>
+            </div>
+
+            <!-- Household Smog Hacks & Precautions -->
+            <div class="card glass-card hacks-card">
+              <h3 class="card-title">⚡ High-Impact Science-Backed IAQ Hacks</h3>
+              <div class="hacks-list" id="hacks-display-list">
+                <!-- Dynamically populated via app.js -->
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ================= TAB 4: IMPACT & ALTERNATIVES ================= -->
+        <section class="tab-pane" id="tab-impact" role="tabpanel">
+          
+          <div class="impact-layout">
+            
+            <!-- Controls & Sliders Card -->
+            <div class="card glass-card impact-controls-card">
+              <h2 class="card-title">Quantified Personal & Community Impact</h2>
+              <p class="card-subtitle">Adjust your commute and lifestyle habits to calculate exact emission cuts and lung shielding.</p>
+
+              <div class="impact-form-grid">
+                <div class="form-group">
+                  <label for="commute-km-slider">Daily Round-Trip Commute: <strong id="commute-km-label">25 km</strong></label>
+                  <input type="range" id="commute-km-slider" min="0" max="80" value="25" step="1">
+                </div>
+
+                <div class="form-group">
+                  <label for="commute-mode-select">Current Commute Mode</label>
+                  <select id="commute-mode-select">
+                    <option value="solo_petrol_car">Solo Petrol Car (Sedan)</option>
+                    <option value="solo_diesel_suv" selected>Solo Diesel SUV (High Particulate)</option>
+                    <option value="two_wheeler">Two-Wheeler (Motorcycle/Scooter)</option>
+                    <option value="carpool">Shared Carpool</option>
+                  </select>
+                </div>
+
+                <div class="form-group checkbox-row">
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="chk-iaq-filter" checked>
+                    <span class="checkmark"></span>
+                    <span>Installed DIY Corsi-Rosenthal / HEPA Purifier in Nursery</span>
+                  </label>
+                </div>
+
+                <div class="form-group checkbox-row">
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="chk-vent-protocol" checked>
+                    <span class="checkmark"></span>
+                    <span>Adhering to Diurnal 1:00 PM Solar Ventilation Window</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Impact Telemetry Meters -->
+            <div class="impact-meters-grid">
+              <div class="meter-card glass-card danger-accent">
+                <div class="meter-icon">🫁</div>
+                <div class="meter-body">
+                  <span class="meter-val" id="meter-pm25-shielded">1,480 µg</span>
+                  <span class="meter-lbl">Daily Inhaled PM2.5 Shielded</span>
+                  <small>Averted from alveolar bloodstream translocation</small>
+                </div>
+              </div>
+
+              <div class="meter-card glass-card warning-accent">
+                <div class="meter-icon">🚬</div>
+                <div class="meter-body">
+                  <span class="meter-val" id="meter-cigs-shielded">5.6</span>
+                  <span class="meter-lbl">Cigarettes Avoided / Day</span>
+                  <small>Berkeley Earth equivalence formula</small>
+                </div>
+              </div>
+
+              <div class="meter-card glass-card success-accent">
+                <div class="meter-icon">🌿</div>
+                <div class="meter-body">
+                  <span class="meter-val" id="meter-co2-saved">1,375 kg</span>
+                  <span class="meter-lbl">Annual CO₂ Reduction</span>
+                  <small id="meter-car-km">Equal to 7,160 km not driven</small>
+                </div>
+              </div>
+
+              <div class="meter-card glass-card info-accent">
+                <div class="meter-icon">👶</div>
+                <div class="meter-body">
+                  <span class="meter-val" id="meter-pediatric-risk">80.8%</span>
+                  <span class="meter-lbl">Pediatric Airway Shield</span>
+                  <small>Reduced acute wheezing and asthma risks</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Explainable AI Impact Narrative -->
+            <div class="card glass-card narrative-card">
+              <div class="narrative-badge">✦ Explainable Impact Narrative</div>
+              <p class="narrative-text" id="impact-narrative-content">
+                By executing your tailored routine and IAQ protocols, you eliminate an estimated 1,480 micrograms of toxic PM2.5 from deep alveolar lung deposition daily—the health equivalent of avoiding 5.6 cigarettes every single day. Simultaneously, shifting your 25 km commute toward electrified rapid transit diverts 1,375 kg of carbon dioxide annually from your city's inversion dome.
+              </p>
+            </div>
+
+            <!-- Sustainable Alternatives Table -->
+            <div class="card glass-card alternatives-card">
+              <h3 class="card-title">Sustainable Lifestyle & Routine Alternatives</h3>
+              <p class="card-subtitle">Zero-compromise swaps that protect health and slash localized emissions</p>
+              
+              <div class="table-responsive">
+                <table class="alternatives-table">
+                  <thead>
+                    <tr>
+                      <th>Domain</th>
+                      <th>High-Smog Habit</th>
+                      <th>Sustainable Alternative</th>
+                      <th>Direct Verified Impact</th>
+                    </tr>
+                  </thead>
+                  <tbody id="alternatives-table-body">
+                    <!-- Populated dynamically via app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ================= TAB 5: COMMUNITY SENTINEL ================= -->
+        <section class="tab-pane" id="tab-community" role="tabpanel">
+          
+          <div class="community-grid">
+            
+            <!-- Grievance Generator Card -->
+            <div class="card glass-card grievance-form-card">
+              <h2 class="card-title">📢 Community Smog Hotspot Sentinel</h2>
+              <p class="card-subtitle">Synthesize formal legal municipal notices and WhatsApp alerts against local smog generators.</p>
+
+              <form id="grievance-form" class="grievance-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="grievance-issue-select">Violation Incident Type</label>
+                    <select id="grievance-issue-select">
+                      <option value="garbage_burning" selected>🔥 Open Garbage / Leaf Biomass Burning</option>
+                      <option value="construction_dust">🏗️ Unmitigated Construction & Demolition Dust</option>
+                      <option value="diesel_generator">⚡ Non-Retrofit Industrial Diesel Generator (DG Set)</option>
+                      <option value="road_dust">🚛 High-Volume Fugitive Roadway Dust</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="grievance-ward-input">Ward / Colony / Area</label>
+                    <input type="text" id="grievance-ward-input" value="Sector 43 & Sushant Lok Phase 1">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="grievance-landmark-input">Specific Landmark / Crossroad</label>
+                    <input type="text" id="grievance-landmark-input" value="Behind Community Park boundary wall">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="grievance-residents-input">Impacted Residents Count</label>
+                    <input type="number" id="grievance-residents-input" value="850" min="10" max="50000">
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btn-generate-grievance">
+                  <span>🏛️ Generate Statutory Municipal Notice & WhatsApp Broadcast</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Output: Formal Letter -->
+            <div class="card glass-card output-letter-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Formal Municipal Notice & Statutory Petition</h3>
+                  <span class="badge-priority" id="grievance-priority-badge">P0 - CRITICAL EMERGENCY</span>
+                </div>
+                <button class="btn btn-sm btn-secondary copy-btn" data-target="grievance-letter-text">📋 Copy Notice</button>
+              </div>
+              <pre class="code-preview" id="grievance-letter-text">Click 'Generate Statutory Municipal Notice' above to draft the legal petition...</pre>
+              <div class="statutory-cite">
+                <strong>Statutory Basis:</strong> <span id="grievance-statutory-basis">The Air (Prevention and Control of Pollution) Act, 1981</span>
+              </div>
+            </div>
+
+            <!-- Output: WhatsApp Broadcast Alert -->
+            <div class="card glass-card output-whatsapp-card">
+              <div class="card-header">
+                <h3 class="card-title">📱 Neighborhood RWA WhatsApp Emergency Alert</h3>
+                <button class="btn btn-sm btn-secondary copy-btn" data-target="whatsapp-broadcast-text">📋 Copy WhatsApp Text</button>
+              </div>
+              <div class="whatsapp-bubble" id="whatsapp-broadcast-text">
+                Waiting for generation...
+              </div>
+            </div>
+
+            <!-- Action Checklist -->
+            <div class="card glass-card checklist-card">
+              <h3 class="card-title">Citizen Action Protocol</h3>
+              <ul class="action-checklist" id="grievance-checklist-items">
+                <li>Capture timestamped geotagged photograph of the violation.</li>
+                <li>Email the formal notice to zonal municipal commissioners.</li>
+                <li>Broadcast the emergency alert in apartment RWA groups.</li>
+                <li>Distribute electric fan heaters to eliminate open scrap-wood bonfires.</li>
+              </ul>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ================= TAB 6: GENAI ASSISTANT ================= -->
+        <section class="tab-pane" id="tab-chat" role="tabpanel">
+          
+          <div class="chat-container glass-card">
+            <div class="chat-header">
+              <div class="chat-avatar">✦</div>
+              <div>
+                <h2 class="card-title">Prāṇa AI Specialist (प्राण मित्र)</h2>
+                <p class="card-subtitle">Powered by Google Gemini 2.5 Flash • Resilient Deterministic Fallback Active</p>
+              </div>
+              <span class="online-indicator"><span class="dot-green"></span> 100% Uptime Guard</span>
+            </div>
+
+            <!-- Quick Prompt Suggestions -->
+            <div class="prompt-chips-wrap">
+              <button class="chip" data-prompt="Which mask is truly effective for my 5-year-old in morning smog?">😷 Mask for 5yo kid</button>
+              <button class="chip" data-prompt="Should I go for outdoor morning run today?">🏃‍♂️ Outdoor jog safety</button>
+              <button class="chip" data-prompt="How to build a Corsi-Rosenthal box purifier with MERV-13 filters?">🛠️ DIY Corsi-Rosenthal</button>
+              <button class="chip" data-prompt="How do I seal leaky old windows against winter smog?">🪟 Sealing window leaks</button>
+              <button class="chip" data-prompt="Which indoor plants absorb benzene and emit oxygen at night?">🌿 Night oxygen plants</button>
+            </div>
+
+            <!-- Chat Message Thread -->
+            <div class="chat-messages" id="chat-messages-thread" aria-live="polite">
+              <div class="message assistant">
+                <div class="msg-avatar">✦</div>
+                <div class="msg-content">
+                  <p>Namaste! I am <strong>Prāṇa AI</strong>, your Urban Air Quality & Winter Smog Specialist. In <strong>Delhi-NCR</strong>, nocturnal radiation inversion is currently compressing PM2.5 particulates into the ground boundary layer.</p>
+                  <p>How can I help protect your household today? Ask me about child respiratory care, safe ventilation windows, commute shifts, or DIY purifier assembly.</p>
+                  <div class="msg-meta">Ready • Google Gemini 2.5 Flash Verified</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Input Form -->
+            <form id="chat-input-form" class="chat-input-row">
+              <input type="text" id="chat-message-input" placeholder="Ask Prāṇa AI about smog safety, symptoms, or IAQ hacks..." autocomplete="off">
+              <button type="submit" class="btn btn-primary send-btn" id="btn-send-chat">
+                <span>Send</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="send-icon">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Main JavaScript Controller -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

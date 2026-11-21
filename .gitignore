@@ -1,0 +1,60 @@
+# ========================================================================
+# PranaAI (.gitignore) — The Ponytail Method Airtight Security Boundary
+# Enforces Zero-Secret Law, Clean Containment & Zero Loose Ends
+# ========================================================================
+
+# Python Bytecode & Compilation Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+
+# Environments & Sensitive Runtime Credentials (Strictly Excluded)
+.env
+.env.*
+.env.local
+*.env
+!.env.example
+.venv/
+venv/
+env/
+ENV/
+
+# Cryptographic Keys, Certificates & Tokens
+*.pem
+*.key
+*.pfx
+*.crt
+*.id_rsa*
+
+# Testing & Code Coverage Artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+test-results.xml
+*.coverage.*
+
+# Deployment & Platform Caches
+.vercel/
+
+# IDE & Editor Metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Operating System Metadata
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs & Temporary Media Caches
+*.log
+scratch/
+temp/
