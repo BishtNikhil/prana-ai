@@ -5,7 +5,7 @@
 [![Security: Ponytail Method](https://img.shields.io/badge/Security-Ponytail%20Method%20Compliant-6366f1.svg?style=flat-square)](SECURITY.md)
 [![Python Version](https://img.shields.io/badge/Python-3.11%20%7C%203.12-3b82f6.svg?style=flat-square)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg?style=flat-square)](LICENSE)
-[![Deployment: Vercel](https://img.shields.io/badge/Vercel-Production%20Live-black.svg?style=flat-square&logo=vercel)](https://prana-ai.vercel.app)
+[![Deployment: Vercel](https://img.shields.io/badge/Vercel-Production%20Live-black.svg?style=flat-square&logo=vercel)](https://pranaai-three.vercel.app)
 
 > **Google Developer PromptWars Virtual 2026 — Challenge 06**  
 > *Engineered by Nikhil Singh Bisht adhering to the **Ponytail Method**: zero hardcoded secrets, airtight exclusion boundaries, single-band apex clasp architecture, and resilient deterministic intelligence.*
