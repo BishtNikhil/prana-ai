@@ -58,3 +58,9 @@ Desktop.ini
 *.log
 scratch/
 temp/
+*.m4a
+*.wav
+*.mp3
+*.mp4
+*.webm
+
