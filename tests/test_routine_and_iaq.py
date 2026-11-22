@@ -1,20 +1,17 @@
-"""
-Unit tests for PranaAI Routine Optimization and IAQ Engines.
-"""
+"""Unit tests for PranaAI Routine Optimization and IAQ Engines."""
 
-import pytest
-from app.models.schemas import PersonaType, IAQRoomRequest
-from app.services.routine_engine import RoutineEngine
+from app.models.schemas import IAQRoomRequest, PersonaType
 from app.services.iaq_engine import IAQEngine
+from app.services.routine_engine import RoutineEngine
 
 
 def test_routine_plan_all_personas():
-    """Validates that daily routine plans are generated cleanly for all 4 personas."""
+    """Validate that daily routine plans are generated cleanly for all 4 personas."""
     personas = [
         PersonaType.FAMILY_WITH_KIDS,
         PersonaType.DAILY_COMMUTER,
         PersonaType.HIGH_RISK_ASTHMA,
-        PersonaType.COMMUNITY_LEADER
+        PersonaType.COMMUNITY_LEADER,
     ]
 
     for p in personas:
@@ -34,7 +31,7 @@ def test_routine_plan_all_personas():
 
 
 def test_iaq_room_cadr_calculation():
-    """Validates Clean Air Delivery Rate (CADR) formula based on room volume."""
+    """Validate Clean Air Delivery Rate (CADR) formula based on room volume."""
     req = IAQRoomRequest(
         room_name="Master Bedroom",
         length_ft=15.0,
@@ -42,7 +39,7 @@ def test_iaq_room_cadr_calculation():
         ceiling_height_ft=10.0,
         occupants=2,
         has_hepa_purifier=False,
-        smog_entry_risk="HIGH"
+        smog_entry_risk="HIGH",
     )
 
     plan = IAQEngine.calculate_room_plan(req)

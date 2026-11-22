@@ -1,15 +1,16 @@
-"""
-Gemini GenAI Service.
+"""Gemini GenAI Service.
 
 Connects to Google Gemini 2.5 Flash API with strict typed contracts,
 and provides an instant, intelligent deterministic fallback ensuring
 100% uptime and resilience against API rate-limits or offline environments.
 """
 
-import json
-from typing import Optional, List, Dict, Any
+import logging
+
 from app.config import config
-from app.models.schemas import ChatMessageRequest, ChatMessageResponse, PersonaType
+from app.models.schemas import ChatMessageRequest, ChatMessageResponse
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiService:
@@ -17,7 +18,14 @@ class GeminiService:
 
     @classmethod
     def answer_query(cls, req: ChatMessageRequest) -> ChatMessageResponse:
-        """Processes user air quality questions with GenAI, backed by deterministic heuristics."""
+        """Process user air quality questions with GenAI, backed by deterministic heuristics.
+
+        Args:
+            req (ChatMessageRequest): User question, city location, persona, and conversation context.
+
+        Returns:
+            ChatMessageResponse: Science-backed answer, actionable takeaway, confidence score, and source.
+        """
         # Attempt calling Gemini if API key is provided
         if config.gemini_api_key:
             try:
@@ -27,22 +35,35 @@ class GeminiService:
                         reply=reply,
                         actionable_takeaway="Generated via Google Gemini 2.5 Flash Air Quality Specialist.",
                         confidence_score=0.96,
-                        source="gemini_2.5_flash"
+                        source="gemini_2.5_flash",
                     )
-            except Exception as e:
-                # Log and seamlessly fallback
-                print(f"[GeminiService] Live API invocation failed ({e}), switching to deterministic engine.")
+            except Exception as exc:  # noqa: BLE001
+                # Structured logging and seamless fallback
+                logger.warning(
+                    "Gemini API invocation encountered an issue: %s. Switching to deterministic engine.",
+                    exc,
+                )
 
         # Deterministic Intelligent Fallback
         return cls._generate_deterministic_fallback(req)
 
     @classmethod
-    def _call_gemini_api(cls, req: ChatMessageRequest) -> Optional[str]:
-        """Invokes Google Gemini 2.5 Flash model."""
+    def _call_gemini_api(cls, req: ChatMessageRequest) -> str | None:
+        """Invoke Google Gemini 2.5 Flash model endpoint.
+
+        Args:
+            req (ChatMessageRequest): User question and geographic context.
+
+        Returns:
+            str | None: Synthesized answer string, or None if response is empty or failed.
+        """
         import requests
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{config.gemini_model}:generateContent?key={config.gemini_api_key}"
-        
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/{config.gemini_model}:"
+            f"generateContent?key={config.gemini_api_key}"
+        )
+
         system_prompt = (
             f"You are Prāṇa AI (प्राण AI), an empathetic, expert Urban Air Quality and Smog Resilience Specialist. "
             f"The user is located in {req.city} facing severe winter smog and atmospheric thermal inversion. "
@@ -61,8 +82,8 @@ class GeminiService:
             ],
             "generationConfig": {
                 "temperature": 0.3,
-                "maxOutputTokens": 350
-            }
+                "maxOutputTokens": 350,
+            },
         }
 
         resp = requests.post(url, json=payload, timeout=8.0)
@@ -77,9 +98,15 @@ class GeminiService:
 
     @classmethod
     def _generate_deterministic_fallback(cls, req: ChatMessageRequest) -> ChatMessageResponse:
-        """High-precision, science-backed fallback for prompt wars evaluation."""
+        """High-precision, science-backed fallback for prompt wars evaluation.
+
+        Args:
+            req (ChatMessageRequest): User query and city context.
+
+        Returns:
+            ChatMessageResponse: Domain-expert synthesized recommendations and precautions.
+        """
         msg = req.message.lower()
-        persona = req.persona
 
         if "mask" in msg or "n95" in msg or "cloth" in msg:
             reply = (
@@ -88,39 +115,53 @@ class GeminiService:
                 f"fitted N95, FFP2, or KF94 respirator. Ensure a tight seal across the nasal bridge to prevent "
                 f"perimeter leaks, which degrade filtration efficiency by over 60%."
             )
-            takeaway = "Use certified N95/KF94 masks with a snug nasal pinch; discard when breathing resistance increases."
+            takeaway = (
+                "Use certified N95/KF94 masks with a snug nasal pinch; discard when breathing resistance increases."
+            )
         elif "purifier" in msg or "filter" in msg or "cadr" in msg:
             reply = (
-                f"If commercial air purifiers are too expensive in {req.city}, assemble an open-source Corsi-Rosenthal "
-                f"box using four 20x20 MERV-13 filters and a standard box fan. It delivers over 250 CFM of clean air delivery "
-                f"(CADR) at a fraction of the cost. Keep purifiers at least 1.5 feet away from walls and avoid running ozone "
-                f"ionizers, which create secondary respiratory irritants."
+                f"If commercial air purifiers are too expensive in {req.city}, assemble an open-source "
+                "Corsi-Rosenthal box using four 20x20 MERV-13 filters and a standard box fan. "
+                "It delivers over 250 CFM of clean air delivery (CADR) at a fraction of the cost. "
+                "Keep purifiers at least 1.5 feet away from walls and avoid running ozone ionizers, "
+                "which create secondary respiratory irritants."
             )
-            takeaway = "Place purifiers in the center of living/sleeping areas and avoid electrostatic ozone generators."
+            takeaway = (
+                "Place purifiers in the center of living/sleeping areas and avoid electrostatic ozone generators."
+            )
         elif "exercise" in msg or "jog" in msg or "run" in msg or "walk" in msg:
             reply = (
-                f"Never exercise outdoors in {req.city} before 11:00 AM during winter. Nocturnal thermal radiation "
-                f"inversion traps high-density toxic particulate soup near ground level. Heavy breathing during running "
-                f"increases your ventilation volume from 6 L/min to over 60 L/min, depositing millions of toxic particles "
-                f"deep in your alveolar sacs. Switch to indoor yoga, pilates, or treadmill workouts in a filtered room."
+                f"Never exercise outdoors in {req.city} before 11:00 AM during winter. "
+                "Nocturnal thermal radiation inversion traps high-density toxic particulate soup near ground level. "
+                "Heavy breathing during running increases your ventilation volume from 6 L/min to over 60 L/min, "
+                "depositing millions of toxic particles deep in your alveolar sacs. "
+                "Switch to indoor workouts (yoga, treadmill) in a filtered room."
             )
-            takeaway = "Move morning workouts indoors into a sealed, filtered room until afternoon solar mixing occurs."
+            takeaway = (
+                "Move morning workouts indoors into a sealed, filtered room until afternoon solar mixing occurs."
+            )
         elif "child" in msg or "kid" in msg or "baby" in msg or "school" in msg:
             reply = (
-                f"Children inhale 50% more air per pound of body weight than adults, and their narrower airways make them "
-                f"extremely vulnerable to winter smog in {req.city}. Keep nursery windows sealed with silicone weatherstrips, "
-                f"run purifiers continuously on Sleep/Medium mode, and request school administrators to cancel outdoor "
-                f"morning assemblies whenever the AQI exceeds 250."
+                f"Children inhale 50% more air per pound of body weight than adults, and their narrower airways "
+                f"make them extremely vulnerable to winter smog in {req.city}. Keep nursery windows sealed with "
+                f"silicone weatherstrips, run purifiers continuously on Sleep/Medium mode, and request school "
+                f"administrators to cancel outdoor morning assemblies whenever the AQI exceeds 250."
             )
-            takeaway = "Seal nursery perimeter gaps and replace outdoor play with active indoor games during morning inversions."
+            takeaway = (
+                "Seal nursery perimeter gaps and replace outdoor play with "
+                "active indoor games during morning inversions."
+            )
         elif "plant" in msg or "natural" in msg:
             reply = (
-                f"NASA Clean Air studies show that indoor plants like Sansevieria (Snake Plant) and Areca Palm improve "
-                f"micro-climates. Snake plants utilize Crassulacean Acid Metabolism to release oxygen and absorb CO2 at night, "
-                f"making them ideal for bedrooms. However, while plants neutralize VOCs, they cannot replace active mechanical "
-                f"filtration (HEPA/Corsi-Rosenthal) for high-density PM2.5."
+                "NASA Clean Air studies show that indoor plants like Sansevieria (Snake Plant) and Areca Palm "
+                "improve micro-climates. Snake plants utilize Crassulacean Acid Metabolism to release oxygen and "
+                "absorb CO2 at night, making them ideal for bedrooms. However, while plants neutralize VOCs, they "
+                "cannot replace active mechanical filtration (HEPA/Corsi-Rosenthal) for high-density PM2.5."
             )
-            takeaway = "Pair indoor plants for humidity & VOC balance with active HEPA/MERV-13 mechanical particulate filters."
+            takeaway = (
+                "Pair indoor plants for humidity & VOC balance with active "
+                "HEPA/MERV-13 mechanical particulate filters."
+            )
         else:
             reply = (
                 f"In {req.city}, urban winter smog is driven by meteorological thermal inversions that trap surface "
@@ -134,5 +175,5 @@ class GeminiService:
             reply=reply,
             actionable_takeaway=takeaway,
             confidence_score=0.98,
-            source="prana_deterministic_resilience_engine"
+            source="prana_deterministic_resilience_engine",
         )

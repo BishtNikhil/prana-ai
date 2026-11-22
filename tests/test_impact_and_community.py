@@ -1,15 +1,16 @@
-"""
-Unit tests for Impact Engine and Community Grievance Service.
-"""
+"""Unit tests for Impact Engine and Community Grievance Service."""
 
-import pytest
-from app.models.schemas import ImpactRequest, CommuteMode, CommunityGrievanceRequest
-from app.services.impact_engine import ImpactEngine
+from app.models.schemas import (
+    CommunityGrievanceRequest,
+    CommuteMode,
+    ImpactRequest,
+)
 from app.services.community_service import CommunityService
+from app.services.impact_engine import ImpactEngine
 
 
 def test_impact_engine_evaluation():
-    """Validates emission calculations, cigarette equivalents, and alternatives."""
+    """Validate emission calculations, cigarette equivalents, and alternatives."""
     req = ImpactRequest(
         daily_commute_km=25.0,
         commute_mode=CommuteMode.SOLO_DIESEL_SUV,
@@ -17,7 +18,7 @@ def test_impact_engine_evaluation():
         winter_heating_source="ELECTRIC",
         cooking_style="HIGH_FRYING",
         adopted_ventilation_protocol=True,
-        installed_diy_iaq_filter=True
+        installed_diy_iaq_filter=True,
     )
     res = ImpactEngine.evaluate_impact(req)
 
@@ -32,14 +33,14 @@ def test_impact_engine_evaluation():
 
 
 def test_community_service_garbage_burning():
-    """Validates municipal grievance and WhatsApp alert for open waste burning."""
+    """Validate municipal grievance and WhatsApp alert for open waste burning."""
     req = CommunityGrievanceRequest(
         issue_type="garbage_burning",
         ward_or_colony="Green Park Extension",
         city="Delhi-NCR",
         landmark="Near DDA Community Center",
         frequency="DAILY_MORNING",
-        impacted_residents=650
+        impacted_residents=650,
     )
     res = CommunityService.generate_grievance(req)
 
@@ -52,14 +53,14 @@ def test_community_service_garbage_burning():
 
 
 def test_community_service_construction_dust():
-    """Validates construction dust compliance notice."""
+    """Validate construction dust compliance notice."""
     req = CommunityGrievanceRequest(
         issue_type="construction_dust",
         ward_or_colony="Whitefield",
         city="Bengaluru",
         landmark="Metro Flyover Pillar 140",
         frequency="OCCASIONAL",
-        impacted_residents=300
+        impacted_residents=300,
     )
     res = CommunityService.generate_grievance(req)
 

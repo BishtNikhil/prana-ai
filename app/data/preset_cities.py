@@ -1,14 +1,12 @@
-"""
-Preset atmospheric and smog profiles for major urban winter hotspots.
+"""Preset atmospheric and smog profiles for major urban winter hotspots.
 
 Provides empirical baselines for PM2.5, PM10, thermal boundary inversion layers,
 and diurnal smog dispersion patterns.
 """
 
-from typing import Dict, Any
+from typing import Any
 
-
-PRESET_CITIES: Dict[str, Dict[str, Any]] = {
+PRESET_CITIES: dict[str, dict[str, Any]] = {
     "Delhi-NCR": {
         "city_name": "Delhi-NCR",
         "country": "India",
@@ -25,7 +23,10 @@ PRESET_CITIES: Dict[str, Dict[str, Any]] = {
         "evening_peak_hour": 21,
         "best_vent_window": "1:00 PM - 3:00 PM",
         "headline": "Severe Winter Radiation Inversion: Hazardous Smog Blanket Trapped Below 180m",
-        "vulnerable_warning": "Immediate high pulmonary risk for children, infants & asthmatics. Zero outdoor physical exertion recommended."
+        "vulnerable_warning": (
+            "Immediate high pulmonary risk for children, infants & asthmatics. "
+            "Zero outdoor physical exertion recommended."
+        ),
     },
     "Lahore": {
         "city_name": "Lahore",
@@ -43,7 +44,7 @@ PRESET_CITIES: Dict[str, Dict[str, Any]] = {
         "evening_peak_hour": 20,
         "best_vent_window": "1:30 PM - 3:00 PM",
         "headline": "Transboundary Winter Smog Emergency: Dense Toxic Haze with Extreme PM2.5",
-        "vulnerable_warning": "N95 masks mandatory outdoors. Keep windows tightly sealed with foam weatherstripping."
+        "vulnerable_warning": "N95 masks mandatory outdoors. Keep windows tightly sealed with foam weatherstripping.",
     },
     "Beijing": {
         "city_name": "Beijing",
@@ -61,7 +62,7 @@ PRESET_CITIES: Dict[str, Dict[str, Any]] = {
         "evening_peak_hour": 19,
         "best_vent_window": "12:00 PM - 2:00 PM",
         "headline": "Winter District Heating Inversion: Elevated PM2.5 Under Cold High-Pressure Capping",
-        "vulnerable_warning": "Air purifiers should operate on Continuous Medium mode in residential nurseries."
+        "vulnerable_warning": "Air purifiers should operate on Continuous Medium mode in residential nurseries.",
     },
     "Salt Lake City": {
         "city_name": "Salt Lake City",
@@ -79,7 +80,7 @@ PRESET_CITIES: Dict[str, Dict[str, Any]] = {
         "evening_peak_hour": 18,
         "best_vent_window": "2:00 PM - 4:00 PM",
         "headline": "Wasatch Valley Topographic Inversion: Cold Air Trapping Urban Mobile Emissions",
-        "vulnerable_warning": "Sensitive groups and asthmatic runners should restrict outdoor cardio to afternoons."
+        "vulnerable_warning": "Sensitive groups and asthmatic runners should restrict outdoor cardio to afternoons.",
     },
     "London": {
         "city_name": "London",
@@ -97,7 +98,9 @@ PRESET_CITIES: Dict[str, Dict[str, Any]] = {
         "evening_peak_hour": 18,
         "best_vent_window": "11:00 AM - 3:00 PM",
         "headline": "Anticyclonic Winter Stagnation: Roadside NO2 Stagnation in Central Low-Emission Zones",
-        "vulnerable_warning": "Pedestrians advised to take back-street walking corridors rather than high-idle arterial roads."
+        "vulnerable_warning": (
+            "Pedestrians advised to take back-street walking corridors rather than high-idle arterial roads."
+        ),
     },
     "Mumbai": {
         "city_name": "Mumbai",
@@ -115,17 +118,24 @@ PRESET_CITIES: Dict[str, Dict[str, Any]] = {
         "evening_peak_hour": 20,
         "best_vent_window": "12:30 PM - 3:30 PM",
         "headline": "Coastal Marine Inversion & Urban Dust: Sea-Breeze Reversal Trapping Coastal Smog",
-        "vulnerable_warning": "Early morning joggers should wear particulate respirators during low wind-speed hours."
-    }
+        "vulnerable_warning": "Early morning joggers should wear particulate respirators during low wind-speed hours.",
+    },
 }
 
 
-def get_city_profile(city_name: str) -> Dict[str, Any]:
-    """Retrieves city profile or returns an intelligent parameterized default."""
+def get_city_profile(city_name: str) -> dict[str, Any]:
+    """Retrieve city atmospheric profile or return an intelligent parameterized fallback.
+
+    Args:
+        city_name (str): The name or substring of the urban center to query.
+
+    Returns:
+        dict[str, Any]: Atmospheric baseline parameters, boundary layer behavior, and warnings.
+    """
     for key, data in PRESET_CITIES.items():
         if key.lower() in city_name.lower() or city_name.lower() in key.lower():
             return data
-    
+
     # Sensible fallback for custom cities
     return {
         "city_name": city_name.title(),
@@ -143,5 +153,8 @@ def get_city_profile(city_name: str) -> Dict[str, Any]:
         "evening_peak_hour": 20,
         "best_vent_window": "1:00 PM - 3:00 PM",
         "headline": f"Winter Atmospheric Boundary Inversion Active across {city_name.title()}",
-        "vulnerable_warning": "Elevated particulate concentrations. Implement indoor IAQ filtration and avoid peak-hour idling corridors."
+        "vulnerable_warning": (
+            "Elevated particulate concentrations. "
+            "Implement indoor IAQ filtration and avoid peak-hour idling corridors."
+        ),
     }

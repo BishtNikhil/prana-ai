@@ -1,5 +1,4 @@
-"""
-AQI & Thermal Inversion Engine.
+"""AQI & Thermal Inversion Engine.
 
 Implements standard breakpoint math (CPCB / US EPA standards),
 cigarette equivalence (Berkeley Earth methodology), and diurnal thermal
@@ -7,20 +6,21 @@ boundary layer inversion modeling.
 """
 
 import math
-from typing import List, Dict, Any, Tuple
+from typing import ClassVar
+
+from app.data.preset_cities import get_city_profile
 from app.models.schemas import (
     AQISnapshot,
     PollutantMetrics,
-    ThermalInversionHour
+    ThermalInversionHour,
 )
-from app.data.preset_cities import get_city_profile
 
 
 class AQIEngine:
     """Deterministic Air Quality & Thermal Inversion Modeling Engine."""
 
     # PM2.5 Breakpoints (ug/m3) -> AQI (CPCB / EPA scale)
-    PM25_BREAKPOINTS: List[Tuple[float, float, int, int]] = [
+    PM25_BREAKPOINTS: ClassVar[list[tuple[float, float, int, int]]] = [
         (0.0, 30.0, 0, 50),         # Good
         (30.1, 60.0, 51, 100),      # Satisfactory / Moderate
         (60.1, 90.0, 101, 200),     # Moderate / Sensitive
@@ -32,19 +32,33 @@ class AQIEngine:
 
     @classmethod
     def calculate_pm25_subindex(cls, pm25: float) -> int:
-        """Calculates AQI sub-index for PM2.5 using piecewise linear interpolation."""
+        """Calculate AQI sub-index for PM2.5 using piecewise linear interpolation.
+
+        Args:
+            pm25 (float): Particulate concentration in micrograms per cubic meter (ug/m3).
+
+        Returns:
+            int: Discrete Air Quality Index value (0 - 999).
+        """
         if pm25 <= 0:
             return 0
         for bp_low, bp_high, aqi_low, aqi_high in cls.PM25_BREAKPOINTS:
             if bp_low <= pm25 <= bp_high:
                 aqi = ((aqi_high - aqi_low) / (bp_high - bp_low)) * (pm25 - bp_low) + aqi_low
-                return int(round(aqi))
+                return round(aqi)
         # Cap above highest breakpoint proportionally
-        return int(min(999, 500 + (pm25 - 500) * 0.8))
+        return int(min(999.0, 500.0 + (pm25 - 500.0) * 0.8))
 
     @staticmethod
     def get_aqi_category(aqi: int) -> str:
-        """Categorizes AQI value according to standardized tiers."""
+        """Categorize AQI value according to standardized tiers.
+
+        Args:
+            aqi (int): Air Quality Index value.
+
+        Returns:
+            str: Descriptive tier ("Good", "Satisfactory", "Moderate", "Poor", "Very Poor", "Severe (Hazardous)").
+        """
         if aqi <= 50:
             return "Good"
         elif aqi <= 100:
@@ -60,10 +74,16 @@ class AQIEngine:
 
     @staticmethod
     def calculate_cigarette_equivalent(pm25_ug_m3: float) -> float:
-        """
-        Berkeley Earth Formula:
-        Inhaling 22 ug/m3 of PM2.5 over 24 hours delivers particulate mass
-        equivalent to smoking approximately 1 cigarette.
+        """Calculate daily cigarette inhalation equivalent via Berkeley Earth methodology.
+
+        Formula: Inhaling 22 ug/m3 of PM2.5 over 24 hours delivers particulate
+        mass equivalent to smoking approximately 1 cigarette.
+
+        Args:
+            pm25_ug_m3 (float): PM2.5 concentration in ug/m3.
+
+        Returns:
+            float: Equivalent number of cigarettes smoked per 24 hours.
         """
         return round(pm25_ug_m3 / 22.0, 1)
 
@@ -73,13 +93,23 @@ class AQIEngine:
         base_pm25: float,
         morning_peak: int = 7,
         evening_peak: int = 20,
-        temp_c: float = 14.0
-    ) -> List[ThermalInversionHour]:
-        """
-        Simulates diurnal winter atmospheric boundary layer (ABL) dynamics:
-        - Nocturnal radiative cooling traps pollutants near ground (<150m mixing height).
-        - Solar heating between 12:00 PM and 3:30 PM expands mixing height (800-1200m).
-        - Evening temperature drop triggers renewed inversion layer cap.
+        temp_c: float = 14.0,
+    ) -> list[ThermalInversionHour]:
+        """Simulate diurnal winter atmospheric boundary layer (ABL) dynamics.
+
+        Accounts for:
+        - Nocturnal radiative cooling trapping pollutants near ground (<150m mixing height).
+        - Solar insolation between 12:00 PM and 3:30 PM expanding mixing height (800-1200m).
+        - Evening temperature drop triggering renewed inversion layer capping.
+
+        Args:
+            base_pm25 (float): Baseline particulate concentration.
+            morning_peak (int): Hour of maximum morning radiative inversion. Defaults to 7.
+            evening_peak (int): Hour of maximum evening traffic and subsidence inversion. Defaults to 20.
+            temp_c (float): Ambient surface temperature in Celsius. Defaults to 14.0.
+
+        Returns:
+            list[ThermalInversionHour]: 24-hour hourly trajectory of inversion intensity and ventilation safety.
         """
         curve = []
         for hour in range(24):
@@ -88,22 +118,24 @@ class AQIEngine:
             dist_morning = min(abs(hour - morning_peak), 24 - abs(hour - morning_peak))
             # Evening traffic + cooling peak
             dist_evening = min(abs(hour - evening_peak), 24 - abs(hour - evening_peak))
-            
+
             # Afternoon solar maximum (hour 13 - 15)
             afternoon_factor = max(0.0, 1.0 - abs(hour - 14) / 4.0)
 
             # Inversion intensity: highest at 6-8 AM, lowest at 1-3 PM
-            inversion_intensity = 85.0 * math.exp(-0.5 * (dist_morning / 2.2) ** 2) + \
-                                  75.0 * math.exp(-0.5 * (dist_evening / 2.5) ** 2)
+            inversion_intensity = (
+                85.0 * math.exp(-0.5 * (dist_morning / 2.2) ** 2)
+                + 75.0 * math.exp(-0.5 * (dist_evening / 2.5) ** 2)
+            )
             inversion_intensity = max(15.0, min(98.0, inversion_intensity - (afternoon_factor * 55.0)))
 
             # Mixing height inversely proportional to inversion
-            mixing_height = int(round(120.0 + (1.0 - (inversion_intensity / 100.0)) * 950.0))
-            
+            mixing_height = round(120.0 + (1.0 - (inversion_intensity / 100.0)) * 950.0)
+
             # Ground vs upper boundary temperature
             ground_temp = round(temp_c - (3.5 * math.cos((hour - 4) * math.pi / 12.0)), 1)
 
-            # Window ventilation is safe only when mixing height > 600m and smog trap < 45
+            # Window ventilation is safe only when mixing height > 550m and smog trap < 45
             is_vent_safe = (mixing_height >= 550 and inversion_intensity < 45 and 12 <= hour <= 16)
 
             ampm = "AM" if hour < 12 else "PM"
@@ -118,15 +150,22 @@ class AQIEngine:
                     label=label,
                     ground_temp_c=ground_temp,
                     mixing_height_m=mixing_height,
-                    smog_trap_index=int(round(inversion_intensity)),
-                    ventilation_safe=is_vent_safe
+                    smog_trap_index=round(inversion_intensity),
+                    ventilation_safe=is_vent_safe,
                 )
             )
         return curve
 
     @classmethod
     def get_snapshot(cls, city_name: str) -> AQISnapshot:
-        """Assembles a full AQI snapshot with atmospheric telemetry."""
+        """Assemble a complete AQI snapshot with atmospheric telemetry and inversion analysis.
+
+        Args:
+            city_name (str): Urban center name to evaluate.
+
+        Returns:
+            AQISnapshot: Complete air quality snapshot, pollutants, cigarette equivalence, and inversion curve.
+        """
         profile = get_city_profile(city_name)
         pm25 = profile["base_pm25"]
         pm10 = profile["base_pm10"]
@@ -142,14 +181,14 @@ class AQIEngine:
             o3=profile["base_o3"],
             so2=profile["base_so2"],
             temp_c=profile["temp_c"],
-            humidity_pct=profile["humidity_pct"]
+            humidity_pct=profile["humidity_pct"],
         )
 
         inversion_curve = cls.generate_diurnal_inversion_curve(
             base_pm25=pm25,
             morning_peak=profile.get("morning_peak_hour", 7),
             evening_peak=profile.get("evening_peak_hour", 20),
-            temp_c=profile["temp_c"]
+            temp_c=profile["temp_c"],
         )
 
         return AQISnapshot(
@@ -164,5 +203,5 @@ class AQIEngine:
             safe_ventilation_window=profile.get("best_vent_window", "1:00 PM - 3:00 PM"),
             health_headline=profile.get("headline", "Winter Inversion Active"),
             vulnerable_warning=profile.get("vulnerable_warning", "Restrict outdoor exposure"),
-            inversion_curve=inversion_curve
+            inversion_curve=inversion_curve,
         )

@@ -1,16 +1,16 @@
-"""
-Impact & Sustainable Alternatives Engine.
+"""Impact & Sustainable Alternatives Engine.
 
 Quantifies exact personal and community emission reductions, calculates
 inhaled particulate shielding (Berkeley Earth cigarette equivalence),
 and presents verified sustainable alternatives with explainable narratives.
 """
 
-from typing import Dict, List, Any
+from typing import ClassVar
+
 from app.models.schemas import (
+    CommuteMode,
     ImpactRequest,
     ImpactResponse,
-    CommuteMode
 )
 
 
@@ -18,7 +18,7 @@ class ImpactEngine:
     """Calculates quantified personal and community emissions reductions."""
 
     # Emission factors: kg CO2 per km
-    COMMUTE_EMISSIONS_KG_PER_KM = {
+    COMMUTE_EMISSIONS_KG_PER_KM: ClassVar[dict[CommuteMode, float]] = {
         CommuteMode.SOLO_PETROL_CAR: 0.192,
         CommuteMode.SOLO_DIESEL_SUV: 0.235,
         CommuteMode.TWO_WHEELER: 0.075,
@@ -29,7 +29,7 @@ class ImpactEngine:
     }
 
     # PM2.5 tailpipe grams per km
-    COMMUTE_PM25_GRAMS_PER_KM = {
+    COMMUTE_PM25_GRAMS_PER_KM: ClassVar[dict[CommuteMode, float]] = {
         CommuteMode.SOLO_PETROL_CAR: 0.035,
         CommuteMode.SOLO_DIESEL_SUV: 0.085,
         CommuteMode.TWO_WHEELER: 0.045,
@@ -41,7 +41,14 @@ class ImpactEngine:
 
     @classmethod
     def evaluate_impact(cls, req: ImpactRequest) -> ImpactResponse:
-        """Calculates direct quantified impact and explainable benefits."""
+        """Calculate direct quantified environmental impact and explainable health benefits.
+
+        Args:
+            req (ImpactRequest): User commute distance, transit mode, and home remediation parameters.
+
+        Returns:
+            ImpactResponse: Quantified metrics including PM2.5 avoided, CO2 cut, and comparative alternatives.
+        """
         # 1. Commute analysis
         current_mode = req.commute_mode
         base_co2_kg_per_km = cls.COMMUTE_EMISSIONS_KG_PER_KM.get(current_mode, 0.192)
@@ -56,13 +63,13 @@ class ImpactEngine:
         # In a severe winter smog day (avg PM2.5 = 280 ug/m3), breathing filtered indoor air
         # (maintaining 35 ug/m3) cuts inhaled burden by 245 ug/m3.
         hours_indoors_shielded = 16.0  # Sleeping + working in filtered space
-        air_inhaled_indoors_m3 = hours_indoors_shielded * 0.5  # 8 m3
+        air_inhaled_indoors_m3 = hours_indoors_shielded * 0.5  # 8.0 m3
 
         filter_efficiency = 0.85 if req.installed_diy_iaq_filter else 0.40
         vent_bonus = 1.15 if req.adopted_ventilation_protocol else 1.0
 
         daily_pm25_shielded_ug = round(
-            8.0 * (280.0 - 35.0) * filter_efficiency * vent_bonus, 1
+            air_inhaled_indoors_m3 * (280.0 - 35.0) * filter_efficiency * vent_bonus, 1
         )
         annual_pm25_avoided_g = round((daily_pm25_shielded_ug * 365.0) / 1_000_000.0, 2)
 
@@ -90,26 +97,26 @@ class ImpactEngine:
                 "category": "Urban Commute",
                 "current": f"Solo Commute ({req.commute_mode.value.replace('_', ' ').title()})",
                 "alternative": "Electric Metro + Shared Last-Mile EV Feeder",
-                "impact": f"Slashes tailpipe CO2 by 92% and avoids {daily_co2_saved_kg:.2f} kg CO2 daily."
+                "impact": f"Slashes tailpipe CO2 by 92% and avoids {daily_co2_saved_kg:.2f} kg CO2 daily.",
             },
             {
                 "category": "Indoor Air Filtration",
                 "current": "Sealed Room with No Air Cleaning or Costly $400 HEPA Purifiers",
                 "alternative": "Open-Source Corsi-Rosenthal Box (4x MERV-13 Filters + Box Fan)",
-                "impact": "Delivers 250+ CFM CADR at 83% lower capital cost; replaces filters for $35/season."
+                "impact": "Delivers 250+ CFM CADR at 83% lower capital cost; replaces filters for $35/season.",
             },
             {
                 "category": "Winter Domestic Heating",
                 "current": "Biomass / Charcoal Fire or Traditional Inefficient Coils",
                 "alternative": "High-Efficiency Ceramic Radiant PTC / Heat Pump Heaters",
-                "impact": "Zero localized carbon monoxide (CO) or black carbon emissions inside living spaces."
+                "impact": "Zero localized carbon monoxide (CO) or black carbon emissions inside living spaces.",
             },
             {
                 "category": "Home Ventilation",
                 "current": "Random window opening or permanent winter closure",
                 "alternative": "Targeted Diurnal Inversion Solar Flush (1:00 PM - 3:00 PM)",
-                "impact": "Flushes indoor CO2 buildup while avoiding nocturnal thermal particulate traps."
-            }
+                "impact": "Flushes indoor CO2 buildup while avoiding nocturnal thermal particulate traps.",
+            },
         ]
 
         return ImpactResponse(
@@ -120,5 +127,5 @@ class ImpactEngine:
             car_km_equivalent_saved=car_km_equiv,
             pediatric_lung_risk_reduction_pct=pediatric_benefit,
             explainable_impact_narrative=narrative,
-            sustainable_alternatives=alternatives
+            sustainable_alternatives=alternatives,
         )
